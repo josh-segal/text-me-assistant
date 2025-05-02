@@ -1,0 +1,11 @@
+{
+  "name": "text-me-assistant",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "install:all": "npm install && cd src/functions/message && npm install && cd ../escalate && npm install",
+    "build": "sam build",
+    "start": "sam local start-api",
+    "test": "npm run test --prefix src/functions/message && npm run test --prefix src/functions/escalate"
+  }
+} 
