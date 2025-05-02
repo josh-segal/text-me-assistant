@@ -1,0 +1,30 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Globals:
+  Function:
+    Timeout: 15
+    MemorySize: 256
+    Runtime: nodejs18.x
+
+Parameters:
+  OpenAIApiKey:
+    Type: String
+    NoEcho: true
+    Description: OpenAI API Key
+
+Resources:
+  MessageFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/functions/message/
+      Handler: index.handler
+      Environment:
+        Variables:
+          OPENAI_API_KEY: !Ref OpenAIApiKey
+      Events:
+        MessageEvent:
+          Type: Api
+          Properties:
+            Path: /message
+            Method: post

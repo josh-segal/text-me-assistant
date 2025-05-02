@@ -1,0 +1,17 @@
+{
+    "name": "message-function",
+    "version": "1.0.0",
+    "type": "module",
+    "scripts": {
+        "test": "jest",
+        "build": "npm install",
+        "local": "cd ../../../ && export OPENAI_API_KEY=$(cat .env | grep OPENAI_API_KEY | cut -d '=' -f2) && sam local start-api"
+    },
+    "dependencies": {
+        "dotenv": "^16.5.0",
+        "openai": "^4.0.0"
+    },
+    "devDependencies": {
+        "jest": "^29.0.0"
+    }
+}
