@@ -1,0 +1,181 @@
+{
+  "info": {
+    "name": "Text Me Assistant API",
+    "description": "Collection for testing the Text Me Assistant API endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Message Endpoint",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"Body\": \"What time does the store open?\",\n    \"From\": \"+15551234567\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/message",
+          "host": ["{{base_url}}"],
+          "path": ["message"]
+        },
+        "description": "Test the message endpoint with a basic query"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", () => {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Content-Type is XML\", () => {",
+              "    pm.response.to.have.header(\"Content-Type\", /xml/);",
+              "});",
+              "",
+              "pm.test(\"Response contains <Message> tag\", () => {",
+              "    pm.expect(pm.response.text()).to.include(\"<Message>\");",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Message Endpoint - Emergency",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"Body\": \"URGENT: Fire in the kitchen!\",\n    \"From\": \"+15551234567\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/message",
+          "host": ["{{base_url}}"],
+          "path": ["message"]
+        },
+        "description": "Test the message endpoint with an emergency message"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", () => {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Content-Type is XML\", () => {",
+              "    pm.response.to.have.header(\"Content-Type\", /xml/);",
+              "});",
+              "",
+              "pm.test(\"Response contains <Message> tag\", () => {",
+              "    pm.expect(pm.response.text()).to.include(\"<Message>\");",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Escalate Endpoint",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"original_message\": \"Gas leak in the kitchen\",\n    \"from_number\": \"+15551234567\",\n    \"importance_score\": 0.97\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/escalate",
+          "host": ["{{base_url}}"],
+          "path": ["escalate"]
+        },
+        "description": "Test the escalate endpoint with a high importance message"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", () => {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Content-Type is JSON\", () => {",
+              "    pm.response.to.have.header(\"Content-Type\", /json/);",
+              "});",
+              "",
+              "const jsonData = pm.response.json();",
+              "pm.test(\"Response has success message and timestamp\", () => {",
+              "    pm.expect(jsonData.message).to.be.a('string');",
+              "    pm.expect(jsonData.timestamp).to.exist;",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Escalate Endpoint - No Score",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"original_message\": \"Can you help with the printer?\",\n    \"from_number\": \"+15551234567\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/escalate",
+          "host": ["{{base_url}}"],
+          "path": ["escalate"]
+        },
+        "description": "Test the escalate endpoint without an importance score"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", () => {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Content-Type is JSON\", () => {",
+              "    pm.response.to.have.header(\"Content-Type\", /json/);",
+              "});",
+              "",
+              "const jsonData = pm.response.json();",
+              "pm.test(\"Response has success message and timestamp\", () => {",
+              "    pm.expect(jsonData.message).to.be.a('string');",
+              "    pm.expect(jsonData.timestamp).to.exist;",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

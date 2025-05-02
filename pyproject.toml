@@ -3,7 +3,8 @@ name = "text-me-assistant"
 version = "0.1.0"
 description = "Reduce constant staff interruptions by replacing direct texts with a smart virtual assistant"
 authors = [
-    {name = "Your Name", email = "your.email@example.com"}
+    {name = "Joshua Segal", email = "segalsfly@gmail.com"}
+    {name = "Milo Margolis", email = "milomargolis4@gmail.com"}
 ]
 dependencies = [
     "openai>=1.0.0",
