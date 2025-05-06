@@ -1,13 +1,4 @@
 import OpenAI from 'openai';
-// import dotenv from 'dotenv';
-// import { dirname, join } from 'path';
-// import { fileURLToPath } from 'url';
-
-// const __filename = fileURLToPath(import.meta.url);
-// const __dirname = dirname(__filename);
-// dotenv.config({ path: join(__dirname, '../../../.env')});
-
-// console.log('OPENAI_API_KEY:', process.env.OPENAI_API_KEY ? 'Found' : 'Not found');
 
 // Initialize OpenAI client
 const openai = new OpenAI({
