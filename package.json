@@ -5,7 +5,7 @@
   "scripts": {
     "install:all": "npm install && cd src/functions/message && npm install && cd ../escalate && npm install",
     "build": "sam build",
-    "start": "sam local start-api",
+    "start": "sam local start-api --env-vars env.json",
     "test": "npm run test --prefix src/functions/message && npm run test --prefix src/functions/escalate"
   }
 } 

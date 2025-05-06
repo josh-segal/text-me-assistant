@@ -1,10 +1,18 @@
-import twilio from 'twilio';
-
-// Initialize Twilio client
-const twilioClient = twilio(
-  process.env.TWILIO_ACCOUNT_SID,
-  process.env.TWILIO_AUTH_TOKEN
-);
+// Mock Twilio client for development
+const mockTwilioClient = {
+  validateRequest: () => true,
+  messages: {
+    create: async ({ body, to, from }) => {
+      console.log('Mock Twilio SMS:', {
+        body,
+        to,
+        from,
+        timestamp: new Date().toISOString()
+      });
+      return { sid: 'mock_message_sid' };
+    }
+  }
+};
 
 // Helper function to validate request payload
 function validatePayload(body) {
@@ -33,6 +41,20 @@ function formatEscalationMessage(originalMessage, fromNumber, importanceScore) {
   return `🚨 ESCALATION ALERT${scoreText}\n\nFrom: ${fromNumber}\nMessage: ${originalMessage}`;
 }
 
+function createTwiMLResponse(message, statusCode = 200) {
+  const twimlResponse = `<?xml version="1.0" encoding="UTF-8"?>
+    <Response>
+      <Message>${message}</Message>
+    </Response>`;
+  return {
+    statusCode,
+    body: twimlResponse,
+    headers: {
+      'Content-Type': 'application/xml'
+    }
+  };
+}
+
 export const handler = async (event) => {
   try {
     // Parse request body
@@ -50,12 +72,13 @@ export const handler = async (event) => {
       body.importance_score
     );
 
-    // Send SMS to manager
-    await twilioClient.messages.create({
+    // Send SMS to manager using mock client
+    const result = await mockTwilioClient.messages.create({
       body: escalationMessage,
-      to: process.env.MANAGER_PHONE_NUMBER,
-      from: process.env.TWILIO_PHONE_NUMBER
+      to: "+15551234567", // Mock manager number
+      from: "+15559876543" // Mock sender number
     });
+    console.log('Mocked message response:', result);
 
     // Log successful escalation
     console.log('Escalation sent successfully', {
@@ -64,32 +87,10 @@ export const handler = async (event) => {
       timestamp: new Date().toISOString()
     });
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify({
-        message: 'Escalation sent successfully',
-        timestamp: new Date().toISOString()
-      }),
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    };
+    return createTwiMLResponse('Escalation sent successfully');
 
   } catch (error) {
     console.error('Escalation error:', error);
-
-    // Return appropriate error response
-    const statusCode = error.message.includes('Missing required fields') ? 400 : 500;
-    
-    return {
-      statusCode,
-      body: JSON.stringify({
-        error: error.message,
-        timestamp: new Date().toISOString()
-      }),
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    };
+    return createTwiMLResponse(error.message || 'Internal server error', error.message.includes('Missing required fields') ? 400 : 500);
   }
 }; 
