@@ -1,10 +1,16 @@
 import OpenAI from 'openai';
 import { QA_TEXT } from './qa.js';
+import twilio from 'twilio';
 
 // Initialize OpenAI client
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
+
+// Initialize Twilio client
+const twilioClient = process.env.NODE_ENV === 'development' 
+  ? mockTwilioClient 
+  : twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 
 // Mock Twilio client for development
 const mockTwilioClient = {
@@ -36,6 +42,21 @@ function createTwiMLResponse(message, statusCode = 200) {
       'Content-Type': 'application/xml'
     }
   };
+}
+
+// Helper function to send SMS via Twilio
+async function sendSMS(to, body) {
+  try {
+    await twilioClient.messages.create({
+      body,
+      to,
+      from: process.env.TWILIO_PHONE_NUMBER
+    });
+    console.log(`SMS sent to ${to}`);
+  } catch (error) {
+    console.error('Error sending SMS:', error);
+    throw error;
+  }
 }
 
 export const handler = async (event) => {
@@ -72,10 +93,17 @@ export const handler = async (event) => {
 
     const aiResponse = completion.choices[0].message.content.trim();
     
-    // If the response is the escalation message, we should handle it differently
+    // If the response is the escalation message, handle escalation
     if (aiResponse === "Let me forward this to a manager.") {
-      // TODO: Implement escalation logic here
-      console.log('Message needs escalation:', messageBody);
+      // Log escalation for development
+      console.log('ESCALATION NEEDED:', {
+        from: fromNumber,
+        message: messageBody,
+        timestamp: new Date().toISOString()
+      });
+      
+      // In development, just return the escalation message
+      return createTwiMLResponse("Let me forward this to a manager.");
     }
     
     return createTwiMLResponse(aiResponse);
