@@ -7,11 +7,6 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
 
-// Initialize Twilio client
-const twilioClient = process.env.NODE_ENV === 'development' 
-  ? mockTwilioClient 
-  : twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
-
 // Mock Twilio client for development
 const mockTwilioClient = {
   validateRequest: () => true,
@@ -27,6 +22,11 @@ const mockTwilioClient = {
     }
   }
 };
+
+// Initialize Twilio client based on environment
+const twilioClient = process.env.NODE_ENV === 'development' 
+  ? mockTwilioClient 
+  : twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 
 // Helper function to create TwiML response
 function createTwiMLResponse(message, statusCode = 200) {
