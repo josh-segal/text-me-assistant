@@ -1,16 +1,11 @@
 import OpenAI from 'openai';
-import { QA_TEXT } from './qa.js';
 import twilio from 'twilio';
+import { QA_TEXT } from './qa.js';
 
 // Initialize OpenAI client
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
-
-// Initialize Twilio client
-const twilioClient = process.env.NODE_ENV === 'development' 
-  ? mockTwilioClient 
-  : twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 
 // Mock Twilio client for development
 const mockTwilioClient = {
@@ -27,6 +22,12 @@ const mockTwilioClient = {
     }
   }
 };
+
+// Initialize Twilio client based on environment
+const twilioClient = process.env.NODE_ENV === 'development' 
+  ? mockTwilioClient 
+  : twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+
 
 // Helper function to create TwiML response
 function createTwiMLResponse(message, statusCode = 200) {
@@ -57,7 +58,7 @@ async function sendSMS(to, body) {
     console.error('Error sending SMS:', error);
     throw error;
   }
-}
+} 
 
 export const handler = async (event) => {
   try {
