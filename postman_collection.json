@@ -35,50 +35,8 @@
               "    pm.response.to.have.status(200);",
               "});",
               "",
-              "pm.test(\"Content-Type is XML\", () => {",
-              "    pm.response.to.have.header(\"Content-Type\", /xml/);",
-              "});",
-              "",
-              "pm.test(\"Response contains <Message> tag\", () => {",
-              "    pm.expect(pm.response.text()).to.include(\"<Message>\");",
-              "});"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "Message Endpoint - Emergency",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n    \"Body\": \"URGENT: Fire in the kitchen!\",\n    \"From\": \"+15551234567\"\n}"
-        },
-        "url": {
-          "raw": "{{base_url}}/message",
-          "host": ["{{base_url}}"],
-          "path": ["message"]
-        },
-        "description": "Test the message endpoint with an emergency message"
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"Status code is 200\", () => {",
-              "    pm.response.to.have.status(200);",
-              "});",
-              "",
-              "pm.test(\"Content-Type is XML\", () => {",
-              "    pm.response.to.have.header(\"Content-Type\", /xml/);",
+              "pm.test(\"Content-Type is application/xml\", () => {",
+              "    pm.response.to.have.header(\"Content-Type\", \"application/xml\");",
               "});",
               "",
               "pm.test(\"Response contains <Message> tag\", () => {",
@@ -119,58 +77,12 @@
               "    pm.response.to.have.status(200);",
               "});",
               "",
-              "pm.test(\"Content-Type is JSON\", () => {",
-              "    pm.response.to.have.header(\"Content-Type\", /json/);",
+              "pm.test(\"Content-Type is application/xml\", () => {",
+              "    pm.response.to.have.header(\"Content-Type\", \"application/xml\");",
               "});",
               "",
-              "const jsonData = pm.response.json();",
-              "pm.test(\"Response has success message and timestamp\", () => {",
-              "    pm.expect(jsonData.message).to.be.a('string');",
-              "    pm.expect(jsonData.timestamp).to.exist;",
-              "});"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "Escalate Endpoint - No Score",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n    \"original_message\": \"Can you help with the printer?\",\n    \"from_number\": \"+15551234567\"\n}"
-        },
-        "url": {
-          "raw": "{{base_url}}/escalate",
-          "host": ["{{base_url}}"],
-          "path": ["escalate"]
-        },
-        "description": "Test the escalate endpoint without an importance score"
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"Status code is 200\", () => {",
-              "    pm.response.to.have.status(200);",
-              "});",
-              "",
-              "pm.test(\"Content-Type is JSON\", () => {",
-              "    pm.response.to.have.header(\"Content-Type\", /json/);",
-              "});",
-              "",
-              "const jsonData = pm.response.json();",
-              "pm.test(\"Response has success message and timestamp\", () => {",
-              "    pm.expect(jsonData.message).to.be.a('string');",
-              "    pm.expect(jsonData.timestamp).to.exist;",
+              "pm.test(\"Response contains <Message> tag\", () => {",
+              "    pm.expect(pm.response.text()).to.include(\"<Message>\");",
               "});"
             ]
           }

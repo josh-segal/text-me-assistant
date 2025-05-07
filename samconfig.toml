@@ -4,4 +4,3 @@ version = 0.1
 [default.local]
 [default.local.parameters]
 template = "template.yaml"
-parameter_overrides = "OpenAIApiKey=${env:OPENAI_API_KEY}"
