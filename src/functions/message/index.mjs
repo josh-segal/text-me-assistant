@@ -1,4 +1,5 @@
 import OpenAI from 'openai';
+import { QA_TEXT } from './qa.js';
 
 // Initialize OpenAI client
 const openai = new OpenAI({
@@ -58,7 +59,7 @@ export const handler = async (event) => {
       messages: [
         {
           role: "system",
-          content: "You are a helpful SMS assistant. Be concise as responses are via SMS. Keep responses under 160 characters when possible."
+          content: QA_TEXT
         },
         {
           role: "user",
@@ -70,6 +71,13 @@ export const handler = async (event) => {
     });
 
     const aiResponse = completion.choices[0].message.content.trim();
+    
+    // If the response is the escalation message, we should handle it differently
+    if (aiResponse === "Let me forward this to a manager.") {
+      // TODO: Implement escalation logic here
+      console.log('Message needs escalation:', messageBody);
+    }
+    
     return createTwiMLResponse(aiResponse);
 
   } catch (error) {
