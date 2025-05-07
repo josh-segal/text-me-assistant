@@ -67,7 +67,7 @@ export const handler = async (event) => {
         }
       ],
       max_tokens: 160,
-      temperature: 0.7
+      temperature: 0.5
     });
 
     const aiResponse = completion.choices[0].message.content.trim();
