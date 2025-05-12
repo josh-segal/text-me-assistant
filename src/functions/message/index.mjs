@@ -2,6 +2,8 @@ import OpenAI from "openai";
 import { QA_TEXT } from "./qa.js";
 import twilio from "twilio";
 
+import querystring from "node:querystring";
+
 // Initialize OpenAI client
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -47,20 +49,23 @@ function createTwiMLResponse(message, statusCode = 200) {
 
 export const handler = async (event) => {
   try {
+    console.log("Raw event body:", event.body);
     // Log the full event in development
     if (process.env.NODE_ENV === "development") {
       console.log("Event:", JSON.stringify(event, null, 2));
     }
 
-    // Parse the incoming webhook body
-    const body = event.body
-      ? typeof event.body === "string"
-        ? JSON.parse(event.body)
-        : event.body
-      : {};
+    // Parse incoming webhook body
+    const body =
+      typeof event.body === "string"
+        ? querystring.parse(event.body)
+        : event.body;
 
     const messageBody = body.Body || "";
     const fromNumber = body.From || "";
+
+    console.log("Parsed messageBody:", messageBody);
+    console.log("From number:", fromNumber);
 
     // Call OpenAI
     const completion = await openai.chat.completions.create({
@@ -82,19 +87,37 @@ export const handler = async (event) => {
     const aiResponse = completion.choices[0].message.content.trim();
 
     // If the response is the escalation message, handle escalation
+    // If the response is the escalation message, handle escalation
     if (aiResponse === "Let me forward this to a manager.") {
-      // Log escalation for development
       console.log("ESCALATION NEEDED:", {
         from: fromNumber,
         message: messageBody,
         timestamp: new Date().toISOString(),
       });
 
-      // In development, just return the escalation message
-      return createTwiMLResponse("Let me forward this to a manager.");
+      await twilioClient.messages.create({
+        body: "Let me forward this to a manager.",
+        to: fromNumber,
+        from: process.env.TWILIO_PHONE_NUMBER,
+      });
+
+      return {
+        statusCode: 200,
+        body: "Escalation message sent",
+      };
     }
 
-    return createTwiMLResponse(aiResponse);
+    // Send normal AI response
+    await twilioClient.messages.create({
+      body: aiResponse,
+      to: fromNumber,
+      from: process.env.TWILIO_PHONE_NUMBER,
+    });
+
+    return {
+      statusCode: 200,
+      body: "AI response sent",
+    };
   } catch (error) {
     console.error("Error:", error);
     return createTwiMLResponse(

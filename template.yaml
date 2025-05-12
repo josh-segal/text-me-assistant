@@ -40,11 +40,9 @@ Resources:
             Principal:
               Service: 
                 - lambda.amazonaws.com
-                - sagemaker.amazonaws.com
             Action: sts:AssumeRole
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
-        - arn:aws:iam::aws:policy/AmazonSageMakerFullAccess
       Policies:
         - PolicyName: ApplicationAccess
           PolicyDocument:
@@ -52,49 +50,10 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - sagemaker:InvokeEndpoint
-                  - sagemaker:CreateEndpoint
-                  - sagemaker:CreateEndpointConfig
-                  - sagemaker:CreateModel
-                Resource: '*'
-              - Effect: Allow
-                Action:
                   - logs:CreateLogGroup
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                 Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${AWS::StackName}-*
-
-  # SageMaker Model
-  MessageClassifierModel:
-    Type: AWS::SageMaker::Model
-    Properties:
-      ExecutionRoleArn: !GetAtt ApplicationRole.Arn
-      PrimaryContainer:
-        Image: !Sub '${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/blazingtext:latest'
-        Mode: SingleModel
-        Environment:
-          SAGEMAKER_PROGRAM: 'blazingtext'
-          SAGEMAKER_SUBMIT_DIRECTORY: '/opt/ml/model'
-          SAGEMAKER_CONTAINER_LOG_LEVEL: '20'
-          SAGEMAKER_REGION: !Ref AWS::Region
-
-  # SageMaker Endpoint Configuration
-  MessageClassifierEndpointConfig:
-    Type: AWS::SageMaker::EndpointConfig
-    Properties:
-      ProductionVariants:
-        - InitialInstanceCount: 1
-          InstanceType: ml.t2.medium
-          ModelName: !Ref MessageClassifierModel
-          VariantName: AllTraffic
-
-  # SageMaker Endpoint
-  MessageClassifierEndpoint:
-    Type: AWS::SageMaker::Endpoint
-    Properties:
-      EndpointConfigName: !Ref MessageClassifierEndpointConfig
-      EndpointName: !Sub '${AWS::StackName}-message-classifier'
-
   MessageFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -107,7 +66,6 @@ Resources:
           TWILIO_ACCOUNT_SID: !Ref TwilioAccountSid
           TWILIO_AUTH_TOKEN: !Ref TwilioAuthToken
           TWILIO_PHONE_NUMBER: !Ref TwilioPhoneNumber
-          SAGEMAKER_ENDPOINT_NAME: !Ref MessageClassifierEndpoint
       Events:
         MessageEvent:
           Type: Api
@@ -138,9 +96,6 @@ Outputs:
   ApplicationRoleArn:
     Description: "ARN of the application IAM role"
     Value: !GetAtt ApplicationRole.Arn
-  MessageClassifierEndpoint:
-    Description: "SageMaker Endpoint for Message Classification"
-    Value: !GetAtt MessageClassifierEndpoint.EndpointName
   ApiEndpoint:
     Description: "API Gateway endpoint URL"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"

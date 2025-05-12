@@ -6,7 +6,7 @@ version = 0.1
 template = "template.yaml"
 
 [default.deploy.parameters]
-capabilities = ["CAPABILITY_IAM", "CAPABILITY_NAMED_IAM"]
+capabilities = "CAPABILITY_IAM CAPABILITY_NAMED_IAM"
 stack_name = "text-me-assistant"
 resolve_s3 = true
 s3_prefix = "text-me-assistant"
@@ -14,3 +14,4 @@ region = "us-east-1"
 confirm_changeset = true
 disable_rollback = true
 image_repositories = []
+parameter_overrides = "TwilioPhoneNumber=\"+17815635372\" ManagerPhoneNumber=\"+17815635372\""
