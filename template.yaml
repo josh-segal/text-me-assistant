@@ -8,7 +8,7 @@ Globals:
     Runtime: nodejs18.x
 
 Parameters:
-  OPENAI_API_KEY:
+  OpenAiApiKey:
     Type: String
     NoEcho: true
     Description: OpenAI API Key
@@ -103,7 +103,7 @@ Resources:
       Role: !GetAtt ApplicationRole.Arn
       Environment:
         Variables:
-          OPENAI_API_KEY: !Ref OPENAI_API_KEY
+          OPENAI_API_KEY: !Ref OpenAiApiKey
           TWILIO_ACCOUNT_SID: !Ref TwilioAccountSid
           TWILIO_AUTH_TOKEN: !Ref TwilioAuthToken
           TWILIO_PHONE_NUMBER: !Ref TwilioPhoneNumber
