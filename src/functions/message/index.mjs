@@ -69,6 +69,7 @@ export const handler = async (event) => {
 
     // Call OpenAI
     const completion = await openai.chat.completions.create({
+      // think about gpt-4.1-turbo (model: "gpt-4-turbo")
       model: "gpt-3.5-turbo",
       messages: [
         {
