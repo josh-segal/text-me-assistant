@@ -7,5 +7,8 @@
     "build": "sam build",
     "start": "sam local start-api --env-vars env.json",
     "test": "npm run test --prefix src/functions/message && npm run test --prefix src/functions/escalate"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.4"
   }
-} 
+}
