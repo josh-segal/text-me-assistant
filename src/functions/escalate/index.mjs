@@ -83,20 +83,6 @@ function formatEscalationMessage(originalMessage, fromNumber, importanceScore) {
   return `🚨 ESCALATION ALERT${scoreText}\n\nFrom: ${fromNumber}\nMessage: ${originalMessage}`;
 }
 
-function createTwiMLResponse(message, statusCode = 200) {
-  const twimlResponse = `<?xml version="1.0" encoding="UTF-8"?>
-    <Response>
-      <Message>${message}</Message>
-    </Response>`;
-  return {
-    statusCode,
-    body: twimlResponse,
-    headers: {
-      "Content-Type": "application/xml",
-    },
-  };
-}
-
 export const handler = async (event) => {
   try {
     // Parse request body
