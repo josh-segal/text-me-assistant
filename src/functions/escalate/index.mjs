@@ -5,15 +5,15 @@ const mockTwilioClient = {
   validateRequest: () => true,
   messages: {
     create: async ({ body, to, from }) => {
-      console.log('Mock Twilio SMS:', {
+      console.log("Mock Twilio SMS:", {
         body,
         to,
         from,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
-      return { sid: 'mock_message_sid' };
-    }
-  }
+      return { sid: "mock_message_sid" };
+    },
+  },
 };
 
 // Initialize Twilio client based on environment
@@ -55,35 +55,41 @@ async function sendSMS(to, body) {
 // Helper function to validate request payload
 function validatePayload(body) {
   if (!body.original_message || !body.from_number) {
-    throw new Error('Missing required fields: original_message and from_number are required');
+    throw new Error(
+      "Missing required fields: original_message and from_number are required"
+    );
   }
-  
+
   // Validate phone number format (basic validation)
   const phoneRegex = /^\+[1-9]\d{1,14}$/;
   if (!phoneRegex.test(body.from_number)) {
-    throw new Error('Invalid phone number format');
+    throw new Error("Invalid phone number format");
   }
-  
+
   // Validate importance score if provided
   if (body.importance_score !== undefined) {
-    const score = parseFloat(body.importance_score);
-    if (isNaN(score) || score < 0 || score > 1) {
-      throw new Error('Importance score must be a number between 0 and 1');
+    const score = Number.parseFloat(body.importance_score);
+    if (Number.isNaN(score) || score < 0 || score > 1) {
+      throw new Error("Importance score must be a number between 0 and 1");
     }
   }
 }
 
 // Helper function to format escalation message
 function formatEscalationMessage(originalMessage, fromNumber, importanceScore) {
-  const scoreText = importanceScore ? ` (Importance: ${Math.round(importanceScore * 100)}%)` : '';
+  const scoreText = importanceScore
+    ? ` (Importance: ${Math.round(importanceScore * 100)}%)`
+    : "";
   return `🚨 ESCALATION ALERT${scoreText}\n\nFrom: ${fromNumber}\nMessage: ${originalMessage}`;
 }
 
 export const handler = async (event) => {
   try {
     // Parse request body
-    const body = event.body ? 
-      (typeof event.body === 'string' ? JSON.parse(event.body) : event.body) 
+    const body = event.body
+      ? typeof event.body === "string"
+        ? JSON.parse(event.body)
+        : event.body
       : {};
 
     // Validate payload
@@ -102,19 +108,21 @@ export const handler = async (event) => {
       to: process.env.MANAGER_PHONE_NUMBER,
       from: process.env.TWILIO_PHONE_NUMBER
     });
-    console.log('Mocked message response:', result);
+    console.log("Mocked message response:", result);
 
     // Log successful escalation
-    console.log('Escalation sent successfully', {
+    console.log("Escalation sent successfully", {
       fromNumber: body.from_number,
       importanceScore: body.importance_score,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
 
-    return createTwiMLResponse('Escalation sent successfully');
-
+    return createTwiMLResponse("Escalation sent successfully");
   } catch (error) {
-    console.error('Escalation error:', error);
-    return createTwiMLResponse(error.message || 'Internal server error', error.message.includes('Missing required fields') ? 400 : 500);
+    console.error("Escalation error:", error);
+    return createTwiMLResponse(
+      error.message || "Internal server error",
+      error.message.includes("Missing required fields") ? 400 : 500
+    );
   }
-}; 
+};

@@ -5,3 +5,7 @@ To test the project locally, run:
 - sam build
 - sam local start-api --env-vars env.json
 
+To deploy the project to aws-sam, run:
+- sam build
+- sam deploy
+
