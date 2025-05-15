@@ -14,4 +14,4 @@ region = "us-east-1"
 confirm_changeset = true
 disable_rollback = true
 image_repositories = []
-parameter_overrides = "TwilioPhoneNumber=\"+1781...\" ManagerPhoneNumber=\"+1781...\" SupabaseUrl=\"https://...supabase.co\" SupabaseServiceRoleKey=\"<REDACTED>\""
+parameter_overrides = "TwilioPhoneNumber=\"+1781...\" ManagerPhoneNumber=\"+1781...\" SupabaseUrl=\"https://iohtnughzswaircuzwbw.supabase.co\" SupabaseServiceRoleKey=\"<REDACTED>\""
