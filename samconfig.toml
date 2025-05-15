@@ -14,4 +14,4 @@ region = "us-east-1"
 confirm_changeset = true
 disable_rollback = true
 image_repositories = []
-parameter_overrides = "TwilioPhoneNumber=\"+17815635372\" ManagerPhoneNumber=\"+17815635372\""
+parameter_overrides = "TwilioPhoneNumber=\"+17815635372\" ManagerPhoneNumber=\"+17815635372\" SupabaseUrl=\"https://iohtnughzswaircuzwbw.supabase.co\" SupabaseServiceRoleKey=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlvaHRudWdoenN3YWlyY3V6d2J3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NzMyMDI5NiwiZXhwIjoyMDYyODk2Mjk2fQ.k5luyyKBDY7mUTrDYPnmFX_gpgRHr9ujd2LB8ZnOAwA\""

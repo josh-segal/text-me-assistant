@@ -26,6 +26,11 @@ Parameters:
   ManagerPhoneNumber:
     Type: String
     Description: Manager's Phone Number for Escalations
+  SupabaseUrl: 
+    Type: String
+  SupabaseServiceRoleKey:
+    Type: String
+
 
 Resources:
   # Application IAM Roles
@@ -67,6 +72,8 @@ Resources:
           TWILIO_ACCOUNT_SID: !Ref TwilioAccountSid
           TWILIO_AUTH_TOKEN: !Ref TwilioAuthToken
           TWILIO_PHONE_NUMBER: !Ref TwilioPhoneNumber
+          SUPABASE_URL: !Ref SupabaseUrl
+          SUPABASE_SERVICE_ROLE_KEY: !Ref SupabaseServiceRoleKey
       Events:
         MessageEvent:
           Type: Api

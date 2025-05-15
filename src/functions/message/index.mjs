@@ -1,7 +1,7 @@
 import OpenAI from "openai";
 import { QA_TEXT } from "./qa.js";
 import twilio from "twilio";
-
+import { createClient } from "@supabase/supabase-js";
 import querystring from "node:querystring";
 
 // Initialize OpenAI client
@@ -25,12 +25,17 @@ const mockTwilioClient = {
   },
 };
 
+// Initialize the Supabase client based on environment
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
+
 // Initialize Twilio client based on environment
 const twilioClient =
   process.env.NODE_ENV === "development"
     ? mockTwilioClient
     : twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
-
 
 // Helper function to create TwiML response
 function createTwiMLResponse(message, statusCode = 200) {
@@ -54,14 +59,14 @@ async function sendSMS(to, body) {
     await twilioClient.messages.create({
       body,
       to,
-      from: process.env.TWILIO_PHONE_NUMBER
+      from: process.env.TWILIO_PHONE_NUMBER,
     });
     console.log(`SMS sent to ${to}`);
   } catch (error) {
-    console.error('Error sending SMS:', error);
+    console.error("Error sending SMS:", error);
     throw error;
   }
-} 
+}
 
 export const handler = async (event) => {
   try {
@@ -104,6 +109,14 @@ export const handler = async (event) => {
     console.log("Open AI Raw Response: ", JSON.stringify(completion, null, 2));
 
     const aiResponse = completion.choices[0].message.content.trim();
+    await supabase.from("messages").insert([
+      {
+        from_number: fromNumber,
+        message_body: messageBody,
+        ai_response: aiResponse,
+        is_escalated: aiResponse === "Let me forward this to a manager.",
+      },
+    ]);
 
     // If the response is the escalation message, handle escalation
     // If the response is the escalation message, handle escalation
