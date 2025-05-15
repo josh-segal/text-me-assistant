@@ -31,6 +31,7 @@ const twilioClient =
     ? mockTwilioClient
     : twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 
+
 // Helper function to create TwiML response
 function createTwiMLResponse(message, statusCode = 200) {
   const twimlResponse = `<?xml version="1.0" encoding="UTF-8"?>
@@ -46,6 +47,21 @@ function createTwiMLResponse(message, statusCode = 200) {
     },
   };
 }
+
+// Helper function to send SMS via Twilio
+async function sendSMS(to, body) {
+  try {
+    await twilioClient.messages.create({
+      body,
+      to,
+      from: process.env.TWILIO_PHONE_NUMBER
+    });
+    console.log(`SMS sent to ${to}`);
+  } catch (error) {
+    console.error('Error sending SMS:', error);
+    throw error;
+  }
+} 
 
 export const handler = async (event) => {
   try {
