@@ -85,6 +85,8 @@ export const handler = async (event) => {
       temperature: 0.5,
     });
 
+    console.log("Open AI Raw Response: ", JSON.stringify(completion, null, 2));
+
     const aiResponse = completion.choices[0].message.content.trim();
 
     // If the response is the escalation message, handle escalation
@@ -120,7 +122,7 @@ export const handler = async (event) => {
       body: "AI response sent",
     };
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Error:", error?.response?.data || error.message || error);
     return createTwiMLResponse(
       "Sorry, I couldn't process your message. Please try again.",
       500
