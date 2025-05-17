@@ -37,13 +37,16 @@ const twilioClient =
     ? mockTwilioClient
     : twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 
+function escapeXml(str) {
+  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
 // Helper function to create TwiML response
 function createTwiMLResponse(message, statusCode = 200) {
   const twimlResponse = `<?xml version="1.0" encoding="UTF-8"?>
     <Response>
-      <Message>${message}</Message>
+      <Message>${escapeXml(message)}</Message>
     </Response>`;
-
   return {
     statusCode,
     body: twimlResponse,
@@ -68,6 +71,24 @@ async function sendSMS(to, body) {
   }
 }
 
+async function fetchLearnedQAPairs() {
+  const { data, error } = await supabase
+    .from("qa_pairs")
+    .select("question, answer")
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    console.error("Error fetching qa_pairs:", error);
+    return [];
+  }
+
+  return data;
+}
+
+function formatQAPairs(pairs) {
+  return pairs.map((q) => `Q: ${q.question}\nA: ${q.answer}`).join("\n\n");
+}
+
 export const handler = async (event) => {
   try {
     console.log("Raw event body:", event.body);
@@ -89,13 +110,20 @@ export const handler = async (event) => {
     console.log("From number:", fromNumber);
 
     // Call OpenAI
+    // think about gpt-4.1-turbo (model: "gpt-4-turbo")
+    // Fetch learned Q&A from Supabase
+    const learnedQAPairs = await fetchLearnedQAPairs();
+    const learnedQAText = formatQAPairs(learnedQAPairs);
+
+    // Build final system prompt
+    const finalPrompt = `${QA_TEXT}\n\nCustomer Q&A:\n${learnedQAText}`;
+
     const completion = await openai.chat.completions.create({
-      // think about gpt-4.1-turbo (model: "gpt-4-turbo")
       model: "gpt-3.5-turbo",
       messages: [
         {
           role: "system",
-          content: QA_TEXT,
+          content: finalPrompt,
         },
         {
           role: "user",

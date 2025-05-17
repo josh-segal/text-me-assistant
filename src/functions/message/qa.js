@@ -45,7 +45,4 @@ Q: What are your most popular items?
 A: Our most popular items include "The Da Vinci" waffle, "The Tiramisu," and our signature gelato.
 
 Q: Do you have vegan options?
-A: Yes, we offer vegan and dairy-free gelato options.
-
-Q: Can I order online?
-A: Yes, order directly from our website to save on fees and earn rewards.`; 
+A: Yes, we offer vegan and dairy-free gelato options.`;
