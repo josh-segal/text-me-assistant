@@ -154,10 +154,22 @@ export const handler = async (event) => {
         message: messageBody,
         timestamp: new Date().toISOString(),
       });
+      console.log("Sending escalation message...");
+      console.log("  → To:  ", process.env.ESCALATION_PHONE_NUMBER);
+      console.log("  ← From:", process.env.TWILIO_PHONE_NUMBER);
 
+      // Notify the user
       await twilioClient.messages.create({
         body: "Let me forward this to a manager.",
         to: fromNumber,
+        from: process.env.TWILIO_PHONE_NUMBER,
+      });
+
+      // Notify the manager
+      const escalationMessage = `🆘 Escalation Needed\nFrom: ${fromNumber}\nMessage: ${messageBody}`;
+      await twilioClient.messages.create({
+        body: escalationMessage,
+        to: process.env.ESCALATION_PHONE_NUMBER,
         from: process.env.TWILIO_PHONE_NUMBER,
       });
 
