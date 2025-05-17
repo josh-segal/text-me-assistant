@@ -104,6 +104,8 @@ export const handler = async (event) => {
     );
 
     console.log("Sending escalation to:", process.env.MANAGER_PHONE_NUMBER);
+    console.log("  → To:  ", process.env.MANAGER_PHONE_NUMBER);
+    console.log("  ← From:", process.env.TWILIO_PHONE_NUMBER);
     // Send SMS to manager using mock client
     const result = await twilioClient.messages.create({
       body: escalationMessage,
