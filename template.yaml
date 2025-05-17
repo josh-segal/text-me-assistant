@@ -74,6 +74,7 @@ Resources:
           TWILIO_PHONE_NUMBER: !Ref TwilioPhoneNumber
           SUPABASE_URL: !Ref SupabaseUrl
           SUPABASE_SERVICE_ROLE_KEY: !Ref SupabaseServiceRoleKey
+          ESCALATION_PHONE_NUMBER: !Ref ManagerPhoneNumber
       Events:
         MessageEvent:
           Type: Api
