@@ -1,4 +1,4 @@
-import twilio from 'twilio';
+import twilio from "twilio";
 
 // Mock Twilio client for development
 const mockTwilioClient = {
@@ -17,9 +17,10 @@ const mockTwilioClient = {
 };
 
 // Initialize Twilio client based on environment
-const twilioClient = process.env.NODE_ENV === 'development' 
-  ? mockTwilioClient 
-  : twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+const twilioClient =
+  process.env.NODE_ENV === "development"
+    ? mockTwilioClient
+    : twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 
 // Helper function to create TwiML response
 function createTwiMLResponse(message, statusCode = 200) {
@@ -32,8 +33,8 @@ function createTwiMLResponse(message, statusCode = 200) {
     statusCode,
     body: twimlResponse,
     headers: {
-      'Content-Type': 'application/xml'
-    }
+      "Content-Type": "application/xml",
+    },
   };
 }
 
@@ -43,14 +44,14 @@ async function sendSMS(to, body) {
     await twilioClient.messages.create({
       body,
       to,
-      from: process.env.TWILIO_PHONE_NUMBER
+      from: process.env.TWILIO_PHONE_NUMBER,
     });
     console.log(`SMS sent to ${to}`);
   } catch (error) {
-    console.error('Error sending SMS:', error);
+    console.error("Error sending SMS:", error);
     throw error;
   }
-} 
+}
 
 // Helper function to validate request payload
 function validatePayload(body) {
@@ -102,11 +103,12 @@ export const handler = async (event) => {
       body.importance_score
     );
 
+    console.log("Sending escalation to:", process.env.MANAGER_PHONE_NUMBER);
     // Send SMS to manager using mock client
     const result = await twilioClient.messages.create({
       body: escalationMessage,
       to: process.env.MANAGER_PHONE_NUMBER,
-      from: process.env.TWILIO_PHONE_NUMBER
+      from: process.env.TWILIO_PHONE_NUMBER,
     });
     console.log("Mocked message response:", result);
 
