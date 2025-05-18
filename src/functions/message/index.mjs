@@ -90,7 +90,7 @@ export const handler = async (event) => {
 
     // Call OpenAI
     const completion = await openai.chat.completions.create({
-      // think about gpt-4.1-turbo (model: "gpt-4-turbo")
+      // TODO:think about gpt-4.1-turbo (model: "gpt-4-turbo")
       model: "gpt-3.5-turbo",
       messages: [
         {
@@ -119,7 +119,6 @@ export const handler = async (event) => {
     ]);
 
     // If the response is the escalation message, handle escalation
-    // If the response is the escalation message, handle escalation
     if (aiResponse === "Let me forward this to a manager.") {
       console.log("ESCALATION NEEDED:", {
         from: fromNumber,
@@ -132,6 +131,26 @@ export const handler = async (event) => {
         to: fromNumber,
         from: process.env.TWILIO_PHONE_NUMBER,
       });
+
+      // Call the escalate function
+      const escalationResponse = await fetch(
+        "https://api.example.com/escalate", // TODO: change to the actual escalate function
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            original_message: messageBody,
+            from_number: fromNumber,
+            importance_score: 1, // TODO: change to the actual importance score
+          }),
+        }
+      );
+
+      if (!escalationResponse.ok) {
+        throw new Error("Failed to escalate message");
+      }
 
       return {
         statusCode: 200,

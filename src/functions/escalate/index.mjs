@@ -102,13 +102,13 @@ export const handler = async (event) => {
       body.importance_score
     );
 
-    // Send SMS to manager using mock client
+    // Send SMS to manager using twilio client
     const result = await twilioClient.messages.create({
       body: escalationMessage,
       to: process.env.MANAGER_PHONE_NUMBER,
       from: process.env.TWILIO_PHONE_NUMBER
     });
-    console.log("Mocked message response:", result);
+    console.log("Twilio message response:", result);
 
     // Log successful escalation
     console.log("Escalation sent successfully", {
