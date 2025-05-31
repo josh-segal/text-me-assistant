@@ -56,21 +56,6 @@ function createTwiMLResponse(message, statusCode = 200) {
   };
 }
 
-// Helper function to send SMS via Twilio
-async function sendSMS(to, body) {
-  try {
-    await twilioClient.messages.create({
-      body,
-      to,
-      from: process.env.TWILIO_PHONE_NUMBER,
-    });
-    console.log(`SMS sent to ${to}`);
-  } catch (error) {
-    console.error("Error sending SMS:", error);
-    throw error;
-  }
-}
-
 async function fetchLearnedQAPairs() {
   const { data, error } = await supabase
     .from("qa_pairs")
@@ -147,7 +132,6 @@ export const handler = async (event) => {
     ]);
 
     // If the response is the escalation message, handle escalation
-    // If the response is the escalation message, handle escalation
     if (aiResponse === "Let me forward this to a manager.") {
       console.log("ESCALATION NEEDED:", {
         from: fromNumber,
@@ -156,21 +140,21 @@ export const handler = async (event) => {
       });
       console.log("Sending escalation message...");
       console.log("  → To:  ", process.env.ESCALATION_PHONE_NUMBER);
-      console.log("  ← From:", process.env.TWILIO_PHONE_NUMBER);
+      console.log("  ← From:", process.env.TWILIO_MESSAGING_SERVICE_SID);
 
       // Notify the user
       await twilioClient.messages.create({
         body: "Let me forward this to a manager.",
         to: fromNumber,
-        from: process.env.TWILIO_PHONE_NUMBER,
+        messagingServiceSid: process.env.TWILIO_MESSAGING_SERVICE_SID,
       });
 
       // Notify the manager
-      const escalationMessage = `🆘 Escalation Needed\nFrom: ${fromNumber}\nMessage: ${messageBody}`;
+      const escalationMessage = `Escalation Needed\nFrom: ${fromNumber}\nMessage: ${messageBody}`;
       await twilioClient.messages.create({
         body: escalationMessage,
         to: process.env.ESCALATION_PHONE_NUMBER,
-        from: process.env.TWILIO_PHONE_NUMBER,
+        messagingServiceSid: process.env.TWILIO_MESSAGING_SERVICE_SID,
       });
 
       return {
@@ -183,7 +167,7 @@ export const handler = async (event) => {
     await twilioClient.messages.create({
       body: aiResponse,
       to: fromNumber,
-      from: process.env.TWILIO_PHONE_NUMBER,
+      messagingServiceSid: process.env.TWILIO_MESSAGING_SERVICE_SID,
     });
 
     return {

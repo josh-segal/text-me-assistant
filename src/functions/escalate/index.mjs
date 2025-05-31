@@ -44,7 +44,7 @@ async function sendSMS(to, body) {
     await twilioClient.messages.create({
       body,
       to,
-      from: process.env.TWILIO_PHONE_NUMBER,
+      messagingServiceSid: process.env.TWILIO_MESSAGING_SERVICE_SID,
     });
     console.log(`SMS sent to ${to}`);
   } catch (error) {
@@ -105,12 +105,12 @@ export const handler = async (event) => {
 
     console.log("Sending escalation to:", process.env.MANAGER_PHONE_NUMBER);
     console.log("  → To:  ", process.env.MANAGER_PHONE_NUMBER);
-    console.log("  ← From:", process.env.TWILIO_PHONE_NUMBER);
+    console.log("  ← From:", process.env.TWILIO_MESSAGING_SERVICE_SID);
     // Send SMS to manager using mock client
     const result = await twilioClient.messages.create({
       body: escalationMessage,
       to: process.env.MANAGER_PHONE_NUMBER,
-      from: process.env.TWILIO_PHONE_NUMBER,
+      messagingServiceSid: process.env.TWILIO_MESSAGING_SERVICE_SID,
     });
     console.log("Mocked message response:", result);
 

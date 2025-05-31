@@ -30,6 +30,9 @@ Parameters:
     Type: String
   SupabaseServiceRoleKey:
     Type: String
+  TwilioMessagingServiceSid:
+    Type: String
+    Description: Twilio Messaging Service SID
 
 
 Resources:
@@ -72,6 +75,7 @@ Resources:
           TWILIO_ACCOUNT_SID: !Ref TwilioAccountSid
           TWILIO_AUTH_TOKEN: !Ref TwilioAuthToken
           TWILIO_PHONE_NUMBER: !Ref TwilioPhoneNumber
+          TWILIO_MESSAGING_SERVICE_SID: !Ref TwilioMessagingServiceSid
           SUPABASE_URL: !Ref SupabaseUrl
           SUPABASE_SERVICE_ROLE_KEY: !Ref SupabaseServiceRoleKey
           ESCALATION_PHONE_NUMBER: !Ref ManagerPhoneNumber
@@ -93,6 +97,7 @@ Resources:
           TWILIO_ACCOUNT_SID: !Ref TwilioAccountSid
           TWILIO_AUTH_TOKEN: !Ref TwilioAuthToken
           TWILIO_PHONE_NUMBER: !Ref TwilioPhoneNumber
+          TWILIO_MESSAGING_SERVICE_SID: !Ref TwilioMessagingServiceSid
           MANAGER_PHONE_NUMBER: !Ref ManagerPhoneNumber
       Events:
         EscalateEvent:
