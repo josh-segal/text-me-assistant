@@ -41,7 +41,6 @@ function escapeXml(str) {
   return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-// Helper function to create TwiML response
 function createTwiMLResponse(message, statusCode = 200) {
   const twimlResponse = `<?xml version="1.0" encoding="UTF-8"?>
     <Response>
@@ -77,12 +76,10 @@ function formatQAPairs(pairs) {
 export const handler = async (event) => {
   try {
     console.log("Raw event body:", event.body);
-    // Log the full event in development
     if (process.env.NODE_ENV === "development") {
       console.log("Event:", JSON.stringify(event, null, 2));
     }
 
-    // Parse incoming webhook body
     const body =
       typeof event.body === "string"
         ? querystring.parse(event.body)
@@ -94,32 +91,81 @@ export const handler = async (event) => {
     console.log("Parsed messageBody:", messageBody);
     console.log("From number:", fromNumber);
 
-    // Call OpenAI
-    // think about gpt-4.1-turbo (model: "gpt-4-turbo")
-    // Fetch learned Q&A from Supabase
+    // Handle manager replies
+    if (fromNumber === process.env.ESCALATION_PHONE_NUMBER) {
+      console.log("Received message from manager:", messageBody);
+
+      // Fetch latest pending escalation
+      const { data, error } = await supabase
+        .from("messages")
+        .select("id, from_number, message_body")
+        .eq("is_escalated", true)
+        .order("created_at", { ascending: false })
+        .limit(1);
+
+      if (error || !data || data.length === 0) {
+        console.error("No pending escalation found:", error);
+        return createTwiMLResponse(
+          "No active escalation found. Please initiate escalation first.",
+          200
+        );
+      }
+
+      const escalation = data[0];
+
+      // Forward manager's reply to user
+      await twilioClient.messages.create({
+        body: `Manager replied: ${messageBody}`,
+        to: escalation.from_number,
+        messagingServiceSid: process.env.TWILIO_MESSAGING_SERVICE_SID,
+      });
+
+      // Save manager response
+      await supabase
+        .from("messages")
+        .update({ is_escalated: false, manager_response: messageBody })
+        .eq("id", escalation.id);
+
+      // Save the Q&A pair
+      await supabase.from("qa_pairs").insert([
+        {
+          question: escalation.message_body,
+          answer: messageBody,
+        },
+      ]);
+
+      // Notify manager that their response was sent
+      await twilioClient.messages.create({
+        body: "Your response has been sent to the employee and saved in the DaVinci database.",
+        to: fromNumber,
+        messagingServiceSid: process.env.TWILIO_MESSAGING_SERVICE_SID,
+      });
+
+      return {
+        statusCode: 200,
+        body: "Manager response sent to user.",
+      };
+    }
+
+    // Fetch learned Q&A pairs
     const learnedQAPairs = await fetchLearnedQAPairs();
     const learnedQAText = formatQAPairs(learnedQAPairs);
 
     // Build final system prompt
     const finalPrompt = `${QA_TEXT}\n\nCustomer Q&A:\n${learnedQAText}`;
 
+    // Generate AI response
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
       messages: [
-        {
-          role: "system",
-          content: finalPrompt,
-        },
-        {
-          role: "user",
-          content: messageBody,
-        },
+        { role: "system", content: finalPrompt },
+        { role: "user", content: messageBody },
       ],
       max_tokens: 160,
       temperature: 0.5,
     });
 
-    console.log("Open AI Raw Response: ", JSON.stringify(completion, null, 2));
+    console.log("Open AI Raw Response:", JSON.stringify(completion, null, 2));
 
     const aiResponse = completion.choices[0].message.content.trim();
     await supabase.from("messages").insert([
@@ -131,25 +177,19 @@ export const handler = async (event) => {
       },
     ]);
 
-    // If the response is the escalation message, handle escalation
+    // If AI escalates, notify user & manager
     if (aiResponse === "Let me forward this to a manager.") {
       console.log("ESCALATION NEEDED:", {
         from: fromNumber,
         message: messageBody,
-        timestamp: new Date().toISOString(),
       });
-      console.log("Sending escalation message...");
-      console.log("  → To:  ", process.env.ESCALATION_PHONE_NUMBER);
-      console.log("  ← From:", process.env.TWILIO_MESSAGING_SERVICE_SID);
 
-      // Notify the user
       await twilioClient.messages.create({
         body: "Let me forward this to a manager.",
         to: fromNumber,
         messagingServiceSid: process.env.TWILIO_MESSAGING_SERVICE_SID,
       });
 
-      // Notify the manager
       const escalationMessage = `Escalation Needed\nFrom: ${fromNumber}\nMessage: ${messageBody}`;
       await twilioClient.messages.create({
         body: escalationMessage,
@@ -159,7 +199,7 @@ export const handler = async (event) => {
 
       return {
         statusCode: 200,
-        body: "Escalation message sent",
+        body: "Escalation message sent.",
       };
     }
 
@@ -172,7 +212,7 @@ export const handler = async (event) => {
 
     return {
       statusCode: 200,
-      body: "AI response sent",
+      body: "AI response sent.",
     };
   } catch (error) {
     console.error("Error:", error?.response?.data || error.message || error);
