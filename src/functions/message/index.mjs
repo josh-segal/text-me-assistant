@@ -3,6 +3,7 @@ import { QA_TEXT } from "./qa.js";
 import twilio from "twilio";
 import { createClient } from "@supabase/supabase-js";
 import querystring from "node:querystring";
+import { SNSClient, PublishCommand } from "@aws-sdk/client-sns";
 
 // Initialize OpenAI client
 const openai = new OpenAI({
@@ -36,6 +37,9 @@ const twilioClient =
   process.env.NODE_ENV === "development"
     ? mockTwilioClient
     : twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+
+// Initialize SNS client
+const snsClient = new SNSClient({ region: process.env.AWS_REGION });
 
 function escapeXml(str) {
   return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -71,6 +75,21 @@ async function fetchLearnedQAPairs() {
 
 function formatQAPairs(pairs) {
   return pairs.map((q) => `Q: ${q.question}\nA: ${q.answer}`).join("\n\n");
+}
+
+// Helper function to publish to SNS
+async function publishToSNS(topicArn, message, subject) {
+  try {
+    const command = new PublishCommand({
+      TopicArn: topicArn,
+      Message: JSON.stringify(message, null, 2),
+      Subject: subject,
+    });
+    await snsClient.send(command);
+    console.log(`Published to SNS topic ${topicArn}:`, message);
+  } catch (error) {
+    console.error("Error publishing to SNS:", error);
+  }
 }
 
 export const handler = async (event) => {
@@ -141,6 +160,19 @@ export const handler = async (event) => {
         messagingServiceSid: process.env.TWILIO_MESSAGING_SERVICE_SID,
       });
 
+      // Publish to SNS
+      await publishToSNS(
+        process.env.MANAGER_RESPONSE_TOPIC_ARN,
+        {
+          type: "manager_response",
+          fromNumber,
+          messageBody,
+          escalationId: escalation.id,
+          timestamp: new Date().toISOString(),
+        },
+        "Manager Response Received"
+      );
+
       return {
         statusCode: 200,
         body: "Manager response sent to user.",
@@ -197,6 +229,18 @@ export const handler = async (event) => {
         messagingServiceSid: process.env.TWILIO_MESSAGING_SERVICE_SID,
       });
 
+      // Publish to SNS
+      await publishToSNS(
+        process.env.ESCALATION_TOPIC_ARN,
+        {
+          type: "escalation",
+          fromNumber,
+          messageBody,
+          timestamp: new Date().toISOString(),
+        },
+        "Message Escalated to Manager"
+      );
+
       return {
         statusCode: 200,
         body: "Escalation message sent.",
@@ -209,6 +253,19 @@ export const handler = async (event) => {
       to: fromNumber,
       messagingServiceSid: process.env.TWILIO_MESSAGING_SERVICE_SID,
     });
+
+    // Publish to SNS
+    await publishToSNS(
+      process.env.ASSISTANT_RESPONSE_TOPIC_ARN,
+      {
+        type: "assistant_response",
+        toNumber: fromNumber,
+        messageBody: aiResponse,
+        originalMessage: messageBody,
+        timestamp: new Date().toISOString(),
+      },
+      "Assistant Response Sent"
+    );
 
     return {
       statusCode: 200,

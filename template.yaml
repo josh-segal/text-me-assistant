@@ -62,6 +62,18 @@ Resources:
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                 Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${AWS::StackName}-*
+        - PolicyName: SNSPublishAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sns:Publish
+                Resource:
+                  - !Ref EmployeeMessageTopic
+                  - !Ref AssistantResponseTopic
+                  - !Ref EscalationTopic
+                  - !Ref ManagerResponseTopic
 
   MessageFunction:
     Type: AWS::Serverless::Function
@@ -79,6 +91,10 @@ Resources:
           SUPABASE_URL: !Ref SupabaseUrl
           SUPABASE_SERVICE_ROLE_KEY: !Ref SupabaseServiceRoleKey
           ESCALATION_PHONE_NUMBER: !Ref ManagerPhoneNumber
+          EMPLOYEE_MESSAGE_TOPIC_ARN: !Ref EmployeeMessageTopic
+          ASSISTANT_RESPONSE_TOPIC_ARN: !Ref AssistantResponseTopic
+          ESCALATION_TOPIC_ARN: !Ref EscalationTopic
+          MANAGER_RESPONSE_TOPIC_ARN: !Ref ManagerResponseTopic
       Events:
         MessageEvent:
           Type: Api
@@ -105,6 +121,31 @@ Resources:
           Properties:
             Path: /escalate
             Method: post
+
+  # SNS Topics
+  EmployeeMessageTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub ${AWS::StackName}-employee-messages
+      DisplayName: Employee Messages
+
+  AssistantResponseTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub ${AWS::StackName}-assistant-responses
+      DisplayName: Assistant Responses
+
+  EscalationTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub ${AWS::StackName}-escalations
+      DisplayName: Message Escalations
+
+  ManagerResponseTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub ${AWS::StackName}-manager-responses
+      DisplayName: Manager Responses
 
 Outputs:
   ApplicationRoleArn:
