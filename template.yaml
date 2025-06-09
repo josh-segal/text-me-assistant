@@ -70,7 +70,6 @@ Resources:
                 Action:
                   - sns:Publish
                 Resource:
-                  - !Ref EmployeeMessageTopic
                   - !Ref AssistantResponseTopic
                   - !Ref EscalationTopic
                   - !Ref ManagerResponseTopic
@@ -91,7 +90,6 @@ Resources:
           SUPABASE_URL: !Ref SupabaseUrl
           SUPABASE_SERVICE_ROLE_KEY: !Ref SupabaseServiceRoleKey
           ESCALATION_PHONE_NUMBER: !Ref ManagerPhoneNumber
-          EMPLOYEE_MESSAGE_TOPIC_ARN: !Ref EmployeeMessageTopic
           ASSISTANT_RESPONSE_TOPIC_ARN: !Ref AssistantResponseTopic
           ESCALATION_TOPIC_ARN: !Ref EscalationTopic
           MANAGER_RESPONSE_TOPIC_ARN: !Ref ManagerResponseTopic
@@ -123,12 +121,6 @@ Resources:
             Method: post
 
   # SNS Topics
-  EmployeeMessageTopic:
-    Type: AWS::SNS::Topic
-    Properties:
-      TopicName: !Sub ${AWS::StackName}-employee-messages
-      DisplayName: Employee Messages
-
   AssistantResponseTopic:
     Type: AWS::SNS::Topic
     Properties:
