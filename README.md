@@ -1,4 +1,4 @@
-# Text-Me Assistant — Da Vinci Gelato
+# Text-Me Assistant -> Da Vinci Gelato
 
 The goal of this project is to reduce constant staff interruptions by replacing direct texts with a virtual assistant. This AI-powered SMS assistant answers common questions and escalates anything it can’t handle to a manager, learning from their response.
 
