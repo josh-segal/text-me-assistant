@@ -2,8 +2,6 @@
 
 The goal of this project is to reduce constant staff interruptions by replacing direct texts with a virtual assistant. This AI-powered SMS assistant answers common questions and escalates anything it can’t handle to a manager, learning from their response.
 
----
-
 ## How It Works
 
 1. **User texts the business number** (we use Twilio).
@@ -25,7 +23,7 @@ The assistant is instructed to only answer using approved information:
 
 > "You must answer employee questions **ONLY** using the exact information provided... If you cannot find the answer in the information below, respond with exactly: `Let me forward this to a manager.`"
 
-## 🗂Tech Stack
+## Tech Stack
 
 - **OpenAI GPT-3.5 Turbo** –> Language model for generating responses
 - **Twilio** –> Handles SMS send/receive
@@ -37,11 +35,3 @@ The assistant is instructed to only answer using approved information:
 
 - [ ] Handle concurrent incoming messages (race conditions)
 - [ ] Create a dashboard for the manager to **review/edit answers**
-
-## 🧪 Running Locally
-
-To test the project locally:
-
-```bash
-sam build
-sam local start-api --env-vars env.json
