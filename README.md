@@ -33,5 +33,7 @@ The assistant is instructed to only answer using approved information:
 
 ## Some Next Steps + Improvements
 
+- Modularize all the core logic into helper files like (db.js, ai.js, sms.js, utils.js) 
+- Clean up the redundant code in index.mjs and centralize the Twilio/Supabase client setup 
 - Handle concurrent incoming messages (race conditions)
 - Create a dashboard for the manager to **review/edit answers**
