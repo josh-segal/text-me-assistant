@@ -33,5 +33,5 @@ The assistant is instructed to only answer using approved information:
 
 ## Some Next Steps + Improvements
 
-- [ ] Handle concurrent incoming messages (race conditions)
-- [ ] Create a dashboard for the manager to **review/edit answers**
+- Handle concurrent incoming messages (race conditions)
+- Create a dashboard for the manager to **review/edit answers**
